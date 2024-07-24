@@ -1,7 +1,9 @@
 package com.dituiulian.microservicii.products;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,28 +19,40 @@ public class ProductsController {
 
     }
 
-    @GetMapping("/products")
-    public List<Product> getAllProducts(){
-        return products;
+    @GetMapping(value = "/products", produces = {MediaType.APPLICATION_JSON_VALUE , MediaType.APPLICATION_XML_VALUE})
+    public List<Product> getAllProducts(@RequestParam(name = "searchString", required = false) String searchString) {
+        if (searchString != null) {
+            List<Product> resultSet = new ArrayList<>();
+            for (Product productIterator : products) {
+                if (productIterator.getName().contains(searchString) ||
+                        productIterator.getDescription().contains(searchString)) {
+                    resultSet.add(productIterator);
+                }
+            }
+            return  resultSet;
+        }
+    return products;
+
     }
 
+
     @PostMapping("/products")
-    public String addProduct(Product newProduct){
+    public String addProduct(Product newProduct) {
         products.add(newProduct);
         return "produsul a fost adaugat.";
     }
 
     @PutMapping("/products")
-    public String updateProduct(Product updatedProduct){
-        for(Product productIterator : products){
-             if(productIterator.getId() == updatedProduct.getId()){
-                 productIterator.setName(updatedProduct.getName());
-                 productIterator.setDescription(updatedProduct.getDescription());
-                 productIterator.setPrice(updatedProduct.getPrice());
+    public String updateProduct(Product updatedProduct) {
+        for (Product productIterator : products) {
+            if (productIterator.getId() == updatedProduct.getId()) {
+                productIterator.setName(updatedProduct.getName());
+                productIterator.setDescription(updatedProduct.getDescription());
+                productIterator.setPrice(updatedProduct.getPrice());
 
-                 return "Produsul a fost modificat cu succes.";
+                return "Produsul a fost modificat cu succes.";
 
-             }
+            }
         }
 
         return "Produsul nu a fost gasit.";
@@ -46,9 +60,9 @@ public class ProductsController {
     }
 
     @DeleteMapping("/products/{id}")
-    public String deleteProduct(@PathVariable("id") int id){
-        for(Product productIterator : products){
-            if(productIterator.getId() == id){
+    public String deleteProduct(@PathVariable("id") int id) {
+        for (Product productIterator : products) {
+            if (productIterator.getId() == id) {
                 products.remove((productIterator));
 
                 return "Produsul a fost sters.";
@@ -57,6 +71,17 @@ public class ProductsController {
         }
 
         return "Produsul nu a fost gasit.";
+    }
+
+    @GetMapping(value = "/products/{id}")
+    public Product getProduct(@PathVariable(name = "id") int id) {
+        for (Product productIterator : products) {
+            if (productIterator.getId() == id) {
+                return productIterator;
+            }
+        }
+
+        return null;
     }
 
 
